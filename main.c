@@ -31,7 +31,7 @@ typedef struct Lista {
 
 // Función para crear una nueva Lista
 struct Lista* crearLista() {
-    struct Lista* nuevaLista = (Lista*)calloc(1,sizeof(Lista));
+    Lista* nuevaLista = (Lista*)calloc(1,sizeof(Lista));
     nuevaLista->actual = NULL;
     nuevaLista->raiz = NULL;
     nuevaLista->final = NULL;
@@ -108,6 +108,17 @@ typedef struct Tablero {
     Lista* columna3;
     int niveles;
 } Tablero;
+
+struct Lista* crearTablero(int levels) {
+    Tablero* nuevoTablero = (Tablero*)calloc(1,sizeof(Tablero));
+    Nodo* start = (Nodo*)calloc(1,sizeof(Nodo));
+    nuevoTablero->inicio = start;
+    nuevoTablero->columna1 = NULL;
+    nuevoTablero->columna2 = NULL;
+    nuevoTablero->columna3 = NULL;
+    return nuevoTablero;
+}
+
 
 int main() {
     // Se crea una Lista
