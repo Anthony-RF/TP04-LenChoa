@@ -65,11 +65,31 @@ void agregarAlInicio(Lista* l, Nodo* n) {
         l->longitud = 1;
     }
     else {
-        l->raiz->anterior = n;
-        n->siguiente = l->raiz;
-        l->raiz= l->raiz->anterior;
-        l->actual = l->raiz;
-        l->longitud = l->longitud += 1;
+        if (n->siguiente == NULL) {
+            l->raiz->anterior = n;
+            n->siguiente = l->raiz;
+            l->raiz= l->raiz->anterior;
+            l->actual = l->raiz;
+            l->longitud = l->longitud += 1;
+        }
+        else if (n->siguiente != NULL && n->izquierda == NULL) {
+            l->raiz->anterior = n;
+            n->izquierda = l->raiz;
+            l->raiz= l->raiz->anterior;
+            l->actual = l->raiz;
+            l->longitud = l->longitud += 1;
+        }
+        else if (n->siguiente != NULL && n->izquierda != NULL && n->derecha == NULL) {
+            l->raiz->anterior = n;
+            n->derecha = l->raiz;
+            l->raiz= l->raiz->anterior;
+            l->actual = l->raiz;
+            l->longitud = l->longitud += 1;
+        }
+
+        else {
+            printf("Nodo 'n' no cuenta con punteros disponibles para ser enlazado. \n");
+        }
     }
 }
 
@@ -109,18 +129,74 @@ typedef struct Tablero {
     int niveles;
 } Tablero;
 
-struct Lista* crearTablero(int levels) {
+struct Tablero* crearTablero(int levels) {
+
+    //Creación de una estructura Tablero
     Tablero* nuevoTablero = (Tablero*)calloc(1,sizeof(Tablero));
-    Nodo* start = (Nodo*)calloc(1,sizeof(Nodo));
+
+    //Creación del Nodo inicial
+    Nodo* start = crearNodo(0);
+
+    //Creación de las Listas
+    Lista* lista1 = crearLista();
+    Lista* lista2 = crearLista();
+    Lista* lista3 = crearLista();
+
+    //Inicialización de las Listas
+    for(int i=0; i<levels; i++){
+
+        Nodo* n1 = crearNodo(0);
+        Nodo* n2 = crearNodo(0);
+        Nodo* n3 = crearNodo(0);
+
+        n1->derecha = n2;
+        n2->izquierda = n1;
+        n2->derecha = n3;
+        n3->izquierda = n2;
+
+        agregarAlFinal(lista1, n1);
+        agregarAlFinal(lista2, n2);
+        agregarAlFinal(lista3, n3);
+    }
+
+    agregarAlInicio(lista2, start);
+    agregarAlInicio(lista1, start);
+    agregarAlInicio(lista3, start);
+
     nuevoTablero->inicio = start;
-    nuevoTablero->columna1 = NULL;
-    nuevoTablero->columna2 = NULL;
-    nuevoTablero->columna3 = NULL;
+    nuevoTablero->columna1 = lista1;
+    nuevoTablero->columna2 = lista2;
+    nuevoTablero->columna3 = lista3;
+    nuevoTablero->niveles = levels;
     return nuevoTablero;
 }
 
+void imprimirTablero(Tablero* t) {
+
+    if (t->inicio == t->columna1->raiz && t->inicio == t->columna2->raiz && t->inicio == t->columna3->raiz ) {
+        printf("--- %d ---\n", t->inicio->valor);
+
+        t->columna1->actual = t->columna1->raiz->izquierda;
+        t->columna2->actual = t->columna2->raiz->siguiente;
+        t->columna3->actual = t->columna3->raiz->derecha;
+    }
+    for(int i = 0; i < (t -> niveles) - 1 ; i++){
+
+        t->columna1->actual = t->columna1->actual->siguiente;
+        t->columna2->actual = t->columna2->actual->siguiente;
+        t->columna3->actual = t->columna3->actual->siguiente;
+
+        printf("|   |   |\n");
+        printf("%d - %d - %d\n", t->columna1->actual->valor, t->columna2->actual->valor, t->columna3->actual->valor);
+    }
+}
 
 int main() {
+
+    Tablero* tablero = crearTablero(5);
+
+    imprimirTablero(tablero);
+
     // Se crea una Lista
     struct Lista* listaEjemplo = crearLista();
 
@@ -136,15 +212,15 @@ int main() {
     agregarAlInicio(listaEjemplo, crearNodo(-4));
 
     // Se revisa el largo de la lista
-    printf("La longitud de la lista es de %d elementos. \n", len(listaEjemplo));
+    //printf("La longitud de la lista es de %d elementos. \n", len(listaEjemplo));
 
     // Se recorre la lista hacia adelante
-    printf("Recorriendo la lista hacia adelante:\n");
-    recorrerAdelante(listaEjemplo);
+    //printf("Recorriendo la lista hacia adelante:\n");
+    //recorrerAdelante(listaEjemplo);
 
     // Se recorre la lista hacia atras
-    printf("Recorriendo la lista hacia atras:\n");
-    recorrerAtras(listaEjemplo);
+    //("Recorriendo la lista hacia atras:\n");
+    //recorrerAtras(listaEjemplo);
 
     return 0;
 }
