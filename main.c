@@ -123,6 +123,7 @@ void recorrerAtras(Lista* l) {
 // Definición de la estructura de Tablero
 typedef struct Tablero {
     Nodo* inicio;
+    Nodo* actual;
     Lista* columna1;
     Lista* columna2;
     Lista* columna3;
@@ -143,6 +144,7 @@ struct Tablero* crearTablero(int levels) {
     Lista* lista3 = crearLista();
 
     //Inicialización de las Listas
+
     for(int i=0; i<levels; i++){
 
         Nodo* n1 = crearNodo(0);
@@ -164,6 +166,7 @@ struct Tablero* crearTablero(int levels) {
     agregarAlInicio(lista3, start);
 
     nuevoTablero->inicio = start;
+    nuevoTablero->actual = start;
     nuevoTablero->columna1 = lista1;
     nuevoTablero->columna2 = lista2;
     nuevoTablero->columna3 = lista3;
@@ -173,27 +176,207 @@ struct Tablero* crearTablero(int levels) {
 
 void imprimirTablero(Tablero* t) {
 
-    if (t->inicio == t->columna1->raiz && t->inicio == t->columna2->raiz && t->inicio == t->columna3->raiz ) {
-        printf("--- %d ---\n", t->inicio->valor);
+    int niveles = t->niveles;
+    int margen = (niveles/2) * niveles;
 
-        t->columna1->actual = t->columna1->raiz->izquierda;
-        t->columna2->actual = t->columna2->raiz->siguiente;
-        t->columna3->actual = t->columna3->raiz->derecha;
-    }
-    for(int i = 0; i < (t -> niveles) - 1 ; i++){
+    t->columna1->actual = t->columna1->raiz->izquierda;
+    t->columna2->actual = t->columna2->raiz->siguiente;
+    t->columna3->actual = t->columna3->raiz->derecha;
+
+    for(int i = t->niveles; i > 0; i--) {
+
+        if(i == niveles){
+
+            // Imprime el valor de la cuspide del tablero
+
+            for (int j = 0; j < margen + i; j++) {
+                printf(" ");
+            }
+            printf("%d\n", t->inicio->valor);
+
+        }
+
+        else{
+
+            // Imprime los simbolos
+
+            for (int j = 0; j < (margen + i - (2 * (niveles - i))); j++) {
+                printf(" ");
+            }
+            printf("/");
+
+            for (int j = 0; j < (3 * (niveles - i) - 1); j++) {
+                printf(" ");
+            }
+            printf("|");
+
+            for (int j = 0; j < (3 * (niveles - i) - 1); j++) {
+                printf(" ");
+            }
+            printf("%c", '\\');
+
+            printf("\n");
+
+            // Imprime los valores
+
+            for (int j = 0; j < (margen + i - (2 * (niveles - i)) - 1); j++) {
+                printf(" ");
+            }
+            printf("%d", t->columna1->actual->valor);
+
+            for (int j = 0; j < (3 * (niveles - i)); j++) {
+                printf("-");
+            }
+            printf("%d", t->columna2->actual->valor);
+
+            for (int j = 0; j < (3 * (niveles - i)); j++) {
+                printf("-");
+            }
+            printf("%d", t->columna3->actual->valor);
+
+            printf("\n");
+
+            }
+
+        // Se mueve al siguiente valor en las 3 listas
 
         t->columna1->actual = t->columna1->actual->siguiente;
         t->columna2->actual = t->columna2->actual->siguiente;
         t->columna3->actual = t->columna3->actual->siguiente;
+    }
+}
 
-        printf("|   |   |\n");
-        printf("%d - %d - %d\n", t->columna1->actual->valor, t->columna2->actual->valor, t->columna3->actual->valor);
+void iniciarJuego(Tablero* t){
+
+    printf("Instrucciones:\n");
+    printf("Para mover tu pieza, ingrese la cordenada donde esta su pieza y la direccion a la que deseas mover.\n\n\n");
+
+    printf("El tigre se ha colocado en la cuspide del tablero.\n");
+    printf("Los leopardos han tomado su posicion, empieza el juego!\n\n\n");
+
+    t->inicio->valor = 1;
+
+    t->columna1->final->valor = 2;
+    t->columna2->final->valor = 2;
+    t->columna3->final->valor = 2;
+    t->columna1->final->anterior->valor = 2;
+    t->columna2->final->anterior->valor = 2;
+    t->columna3->final->anterior->valor = 2;
+
+    char* jugador = "T";
+
+    int columna;
+    int fila;
+    int ficha;
+    int movimiento;
+
+    int leopardos = 6;
+    int tigreflag = 0;
+
+    while(leopardos > 3 && tigreflag == 0){
+
+        imprimirTablero(t);
+        printf("\n\n", jugador);
+
+        printf("Turno del jugador: %s\n\n", jugador);
+
+        printf("Por favor, ingrese la columna de su ficha: ");
+        scanf("%d", &columna);
+
+        printf("Por favor, ingrese la fila de su ficha: ");
+        scanf("%d", &fila);
+
+        if(columna == 1){
+            t->columna1->actual = t->columna1->raiz;
+            for(int i=0; i < fila; i++)
+            {
+                t->columna1->actual = t->columna1->actual->siguiente;
+            }
+            t->actual = t->columna1->actual;
+        }
+
+        if(columna == 2){
+            t->columna2->actual = t->columna2->raiz;
+            for(int i=0; i < fila; i++)
+            {
+                t->columna2->actual = t->columna2->actual->siguiente;
+            }
+            t->actual = t->columna2->actual;
+        }
+
+        if(columna == 3){
+            t->columna3->actual = t->columna3->raiz;
+            for(int i=0; i < fila; i++)
+            {
+                t->columna3->actual = t->columna3->actual->siguiente;
+            }
+            t->actual = t->columna3->actual;
+        }
+
+        ficha = t->actual->valor;
+
+        printf("Por favor, ingrese la direccion de su movimiento: ");
+        scanf("%d", &movimiento);
+
+        if(jugador == "T" && ficha == 1){
+
+            if(movimiento == 1){
+                    t->actual->siguiente->valor = 1;
+                    t->actual->valor = 0;
+            }
+
+            else if(movimiento == 2){
+                    t->actual->anterior->valor = ficha;
+                    t->actual->valor = 0;
+            }
+
+            else if(movimiento == 3) {
+                    t->actual->derecha->valor = ficha;
+                    t->actual->valor = 0;
+            }
+            else if(movimiento == 4){
+                    t->actual->izquierda->valor = ficha;
+                    t->actual->valor = 0;
+            }
+
+            jugador = "L";
+
+        }
+        if(jugador == "L" && ficha == 2){
+
+            if(movimiento == 1){
+                t->actual->siguiente->valor = ficha;
+                t->actual->valor = 0;
+            }
+
+            if(movimiento == 2){
+                t->actual->siguiente->valor = ficha;
+                t->actual->valor = 0;
+            }
+
+            if(movimiento == 3){
+                t->actual->siguiente->valor = ficha;
+                t->actual->valor = 0;
+            }
+
+            if(movimiento == 4){
+                t->actual->siguiente->valor = ficha;
+                t->actual->valor = 0;
+            }
+
+            jugador = "T";
+        }
+
     }
 }
 
 int main() {
 
-    Tablero* tablero = crearTablero(5);
+    Tablero* tablero = crearTablero(7);
+
+    imprimirTablero(tablero);
+
+    iniciarJuego(tablero);
 
     imprimirTablero(tablero);
 
